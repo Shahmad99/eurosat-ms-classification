@@ -1,0 +1,181 @@
+# =============================================================================
+# EuroSAT MS Project — master configuration
+# =============================================================================
+# Edit this file to change any setting.
+# Command-line arguments to train.py / test.py always override these defaults.
+
+project:
+  seed: 42
+  device: "auto"          # auto | cuda | cpu | mps
+
+# ---------------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------------
+paths:
+  data_root:   "/home/shafiq/Eurosat_Data"
+  ms_root:     "/home/shafiq/Eurosat_Data/EuroSAT_MS"
+  split_file:  "data/splits.npz"   # resolved relative to project root
+  cache_dir:   "cache"
+  results_dir: "results"
+
+# ---------------------------------------------------------------------------
+# Data split
+# ---------------------------------------------------------------------------
+# Test set is fixed at 20% of the full 27 000-sample dataset (5 400 patches),
+# matching the 80/20 train-test requirement.  The validation set is NOT stored
+# as a separate split; it is carved from the 80% train indices at training time
+# (see val_fraction below).  This keeps the test set clean and lets each
+# experiment define its own val size without altering the split file.
+data:
+  train_ratio:  0.80    # 80% train+val, 20% test (stored in splits.npz)
+  val_fraction: 0.15    # fraction of train used as val during fine-tuning
+  num_workers:  0
+
+  class_names:
+    - AnnualCrop
+    - Forest
+    - HerbaceousVegetation
+    - Highway
+    - Industrial
+    - Pasture
+    - PermanentCrop
+    - Residential
+    - River
+    - SeaLake
+
+# ---------------------------------------------------------------------------
+# Band selection
+# ---------------------------------------------------------------------------
+# EuroSAT GeoTIFF file order (0-based):
+#   idx  0   1   2   3   4   5   6   7   8   9  10  11  12
+#        B01 B02 B03 B04 B05 B06 B07 B08 B09 B10 B11 B12 B8A
+# Note: B8A is stored LAST (index 12) rather than between B08 and B09.
+bands:
+  # Reorder file indices → SSL4EO-S12 canonical order [B01..B08, B8A, B09..B12]
+  ms_reorder: [0, 1, 2, 3, 4, 5, 6, 7, 12, 8, 9, 10, 11]
+
+  # After reordering, canonical positions are:
+  #   0=B01  1=B02  2=B03  3=B04  4=B05  5=B06  6=B07  7=B08
+  #   8=B8A  9=B09 10=B10 11=B11 12=B12
+  # Atmospheric bands (B01, B09, B10) at canonical positions 0, 9, 10 are
+  # dropped for the MS arm — they carry no land-cover information.
+  atmos_canonical_idx: [0, 9, 10]
+
+  # The 10 land bands kept for MS, in canonical order.
+  # This list drives both the dataset and the conv1 weight slicing in the model.
+  kept_ms_bands: [B02, B03, B04, B05, B06, B07, B08, B8A, B11, B12]
+
+  # Canonical position of each kept band (derived from the list above).
+  # Used to slice the pretrained 13-channel conv1 weights.
+  kept_ms_idx: [1, 2, 3, 4, 5, 6, 7, 8, 11, 12]
+
+  # RGB arm: R=B04 (file idx 3), G=B03 (idx 2), B=B02 (idx 1)
+  rgb_file_idx: [3, 2, 1]
+
+  # Named band → file index (needed by spectral index / handcrafted features)
+  index_map:
+    B01:  0
+    B02:  1
+    B03:  2
+    B04:  3
+    B05:  4
+    B06:  5
+    B07:  6
+    B08:  7
+    B09:  8
+    B10:  9
+    B11: 10
+    B12: 11
+    B8A: 12
+
+# ---------------------------------------------------------------------------
+# CNN fine-tuning
+# ---------------------------------------------------------------------------
+cnn:
+  weights:
+    rgb: "SENTINEL2_RGB_MOCO"
+    ms:  "SENTINEL2_ALL_MOCO"
+
+  backbone_out_dim: 512
+  head_hidden:      256
+
+  # Discriminative learning rates: lower for pretrained backbone, higher for head
+  backbone_lr:   0.0001
+  head_lr:       0.001
+  weight_decay:  0.0001
+
+  batch_size:       64
+  epochs:           30
+  patience:         10      # early stopping on val accuracy
+  label_smoothing:  0.0
+  augment:          true
+  use_amp:          true
+
+  # Batch size for frozen feature extraction
+  extract_batch: 32
+
+# ---------------------------------------------------------------------------
+# Spectral index features  (for the ML / fusion arms)
+# ---------------------------------------------------------------------------
+features:
+  indices:
+    NDVI:     true
+    NDRE:     true
+    NDWI:     true
+    MNDWI:    true
+    NDWI_Gao: true
+    NDBI:     true
+    BSI:      true
+    SAVI:     true
+
+  index_stats: [mean, std, p10, p90]   # 4 stats × 8 indices = 32-d
+
+  glcm:
+    enabled:    true
+    n_levels:   64
+    distances:  [1, 2]
+    properties: [contrast, homogeneity, energy, correlation, dissimilarity]
+
+  lbp:
+    enabled: true
+    P:        8
+    R:        1
+    n_bins:  10
+
+  sobel:
+    enabled: true
+
+# ---------------------------------------------------------------------------
+# LightGBM hyperparameters
+# ---------------------------------------------------------------------------
+lgbm:
+  n_estimators:          500
+  learning_rate:         0.05
+  num_leaves:            63
+  early_stopping_rounds: 30
+  min_child_samples:     20
+  colsample_bytree:      0.8
+  subsample:             0.8
+  subsample_freq:        1
+  reg_alpha:             0.1
+  reg_lambda:            0.1
+  val_fraction:          0.15   # fraction of train carved for LGBM validation
+
+# ---------------------------------------------------------------------------
+# SHAP / attribution
+# ---------------------------------------------------------------------------
+shap:
+  enabled:         true
+  top_n_features:  30
+  rf_n_estimators: 200
+  rf_n_repeats:    5
+
+# ---------------------------------------------------------------------------
+# Visualization toggles
+# ---------------------------------------------------------------------------
+visualization:
+  confusion_matrix:  true
+  training_curves:   true
+  shap:              true
+  sample_gallery:    true   # test patches with predicted vs true labels
+  gallery_n:         12     # number of patches to show
