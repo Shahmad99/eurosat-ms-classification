@@ -11,7 +11,7 @@ conda activate eurosat
 pip install -r requirements.txt
 ```
 
-**Data:** place the EuroSAT multispectral dataset at `/home/shafiq/Eurosat_Data/EuroSAT_MS/`
+**Data:** place the EuroSAT multispectral dataset at `/Eurosat_Data/EuroSAT_MS/`
 (or update `paths.ms_root` in `config.yaml`).
 
 ---
