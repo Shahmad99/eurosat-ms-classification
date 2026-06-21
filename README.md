@@ -85,13 +85,6 @@ bash scripts/run_all.sh
 | `train_ml.py` | `--arm {indices_only,rgb_cnn,ms_cnn,ms_cnn_indices,all}`, `--force`, `--eval-only`, `--atmos-ablation` |
 | `fusion_ft/run_fusion.py` | `--arm`, `--force`, `--no-xgb`, `--embed-only`, `--hc-only` |
 
-### Smoke test (2 epochs per modality)
-
-```bash
-python train.py --modality rgb --smoke-test
-python train.py --modality ms  --smoke-test
-```
-
 ---
 
 ## Project layout
