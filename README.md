@@ -4,7 +4,8 @@ Sentinel-2 multispectral land-use classification using fine-tuned ResNet-18 back
 spectral index features, and a multi-stream late-fusion pipeline.
 
 # Project Documentation
-Please read the Documentation.pdf 
+**[Project Report](https://github.com/Shahmad99/eurosat-ms-classification/blob/main/Documentation.pdf)**:  read the full report on problem formulation, data preprocessing, model architecture, experiments (E1–E5), results, and discussion.
+
 
 ## Setup
 
