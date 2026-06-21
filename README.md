@@ -1,4 +1,4 @@
-# EuroSAT MS — Land-Cover Classification
+# EuroSAT MS Land-Cover Classification
 
 Sentinel-2 multispectral land-use classification using fine-tuned ResNet-18 backbones,
 spectral index features, and a multi-stream late-fusion pipeline.
@@ -18,14 +18,14 @@ pip install -r requirements.txt
 
 ## Quick start
 
-### 1 — Generate the 80/20 split (run once)
+### 1 Generate the 80/20 split (run once)
 
 ```bash
 python data/splits.py
 python data/splits.py --show    # verify per-class counts
 ```
 
-### 2 — Train
+### 2 :Train
 
 ```bash
 python train.py --modality rgb
@@ -34,7 +34,7 @@ python train.py --modality ms
 
 Checkpoints are saved to `results/rgb/best.pt` and `results/ms/best.pt`.
 
-### 3 — Test / evaluate
+### 3 :Test / evaluate
 
 ```bash
 python test.py --modality rgb --checkpoint results/rgb/best.pt --visualize
@@ -43,7 +43,7 @@ python test.py --modality ms  --checkpoint results/ms/best.pt  --visualize
 
 Outputs: `metrics.json`, `metrics.csv`, `confusion.png`, `training_curves.png`, `sample_gallery.png`.
 
-### 4 — ML / spectral-index arms
+### 4 :ML / spectral-index arms
 
 ```bash
 # Extract spectral index features
@@ -60,7 +60,7 @@ python train_ml.py
 python train_ml.py --arm ms_cnn_indices
 ```
 
-### 5 — Late-fusion pipeline
+### 5 :Late-fusion pipeline
 
 ```bash
 python fusion_ft/run_fusion.py
@@ -68,7 +68,7 @@ python fusion_ft/run_fusion.py --no-xgb     # skip XGBoost comparison
 python fusion_ft/run_fusion.py --arm ms_fusion   # single arm
 ```
 
-### 6 — Full end-to-end run
+### 6 :Full end-to-end run
 
 ```bash
 bash scripts/run_all.sh
