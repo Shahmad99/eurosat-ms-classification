@@ -142,7 +142,7 @@ MS_Project_v2/
 ## Design notes
 
 **Split:** 80% train / 20% test (`data/splits.npz`).  The validation set
-is created from the 80% train indices *at training time* — it is not stored — so the
+is created from the 80% train indices *at training time*; it is not stored so the
 test set remains completely held out.
 
 **MS band handling:** EuroSAT GeoTIFFs store B8A last (index 12 instead of 8).
@@ -152,7 +152,7 @@ input: B02 B03 B04 B05 B06 B07 B08 B8A B11 B12.
 
 **MS backbone:** starts from SENTINEL2_ALL_MOCO (13-channel pretrained). The first
 conv layer is replaced with a 10-channel version whose weights are sliced from the
-pretrained 13-channel filters — only the land-band slices are kept.  This reuses
+pretrained 13-channel filters only the land-band slices are kept.  This reuses
 pretrained spectral knowledge for every band the model actually sees.
 
 **Discriminative learning rates:** backbone at 1e-4, head at 1e-3.  The pretrained
