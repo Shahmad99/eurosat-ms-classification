@@ -3,6 +3,9 @@
 Sentinel-2 multispectral land-use classification using fine-tuned ResNet-18 backbones,
 spectral index features, and a multi-stream late-fusion pipeline.
 
+# Project Documentation
+Please read the Documentation.pdf 
+
 ## Setup
 
 ```bash
